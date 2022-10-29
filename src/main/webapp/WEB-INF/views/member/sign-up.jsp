@@ -15,8 +15,9 @@
         .c-red {
             color: #e00;
         }
+
         .c-blue {
-            color: rgb(22, 229, 252);
+            color: rgb(25, 236, 120);
         }
     </style>
 </head>
@@ -137,7 +138,8 @@
         $(document).ready(function () {
             //입력값 검증 정규표현식
             const getIdCheck = RegExp(/^[a-zA-Z0-9]{4,14}$/);
-            const getPwCheck = RegExp(/([a-zA-Z0-9].*[!,@,#,$,%,^,&,*,?,_,~])|([!,@,#,$,%,^,&,*,?,_,~].*[a-zA-Z0-9])/);
+            const getPwCheck = RegExp(
+                /([a-zA-Z0-9].*[!,@,#,$,%,^,&,*,?,_,~])|([!,@,#,$,%,^,&,*,?,_,~].*[a-zA-Z0-9])/);
             const getName = RegExp(/^[가-힣]+$/);
             const getMail = RegExp(/^[A-Za-z0-9_\.\-]+@[A-Za-z0-9\-]+\.[A-Za-z0-9\-]+/);
 
@@ -165,20 +167,148 @@
                     $('#idChk').html('<b class="c-red">[영문, 숫자로 4~14자 사이로 작성하세요!]</b>');
                     checkArr[0] = false;
                 }
-                
+
+                // 아이디 중복 확인 검증
                 else {
 
+                    fetch('/member/check?type=account&value=' + $idInput.val())
+                        .then(res => res.text())
+                        .then(flag => {
+                            console.log('flag:', flag);
+                            if (flag === 'true') {
+                                $idInput.css('border-color', 'red');
+                                $('#idChk').html('<b class="c-red">[중복된 아이디입니다.]</b>');
+                                checkArr[0] = false;
+                            } else {
+                                // 정상적으로 입력한 경우
+                                $idInput.css('border-color', 'skyblue');
+                                $('#idChk').html('<b class="c-blue">[사용가능한 아이디입니다.]</b>');
+                                checkArr[0] = true;
+                            }
+                        });
 
-                    // 정상적으로 입력한 경우
-                    $idInput.css('border-color', 'skyblue');
-                    $('#idChk').html('<b class="c-blue">[사용가능한 아이디입니다.]</b>');
-                    checkArr[0] = true;
+                    // 자바스크립트 디바운스 , 스로틀 : 디비 커넥션풀 과부하 방지를 위해 필요. -> 찾아보기.
+                }
 
+            }); //end id check event
+
+            //2. 패스워드 입력값 검증.
+            $('#password').on('keyup', function () {
+                //비밀번호 공백 확인
+                if ($("#password").val() === "") {
+                    $('#password').css('border-color', 'red');
+                    $('#pwChk').html('<b class="c-red">[패스워드는 필수정보!]</b>');
+                    checkArr[1] = false;
+                }
+                //비밀번호 유효성검사
+                else if (!getPwCheck.test($("#password").val()) || $("#password").val().length < 8) {
+                    $('#password').css('border-color', 'red');
+                    $('#pwChk').html('<b class="c-red">[특수문자 포함 8자이상]</b>');
+                    checkArr[1] = false;
+                } else {
+                    $('#password').css('border-color', 'skyblue');
+                    $('#pwChk').html('<b class="c-blue">[참 잘했어요]</b>');
+                    checkArr[1] = true;
                 }
 
             });
 
-        });
+            //패스워드 확인란 입력값 검증.
+            $('#password_check').on('keyup', function () {
+                //비밀번호 확인란 공백 확인
+                if ($("#password_check").val() === "") {
+                    $('#password_check').css('border-color', 'red');
+                    $('#pwChk2').html('<b class="c-red">[패스워드확인은 필수정보!]</b>');
+                    checkArr[2] = false;
+                }
+                //비밀번호 확인란 유효성검사
+                else if ($("#password").val() !== $("#password_check").val()) {
+                    $('#password_check').css('border-color', 'red');
+                    $('#pwChk2').html('<b class="c-red">[위에랑 똑같이!!]</b>');
+                    checkArr[2] = false;
+                } else {
+                    $('#password_check').css('border-color', 'skyblue');
+                    $('#pwChk2').html('<b class="c-blue">[참 잘했어요]</b>');
+                    checkArr[2] = true;
+                }
+
+            });
+
+            //이름 입력값 검증.
+            $('#user_name').on('keyup', function () {
+                //이름값 공백 확인
+                if ($("#user_name").val() === "") {
+                    $('#user_name').css('border-color', 'red');
+                    $('#nameChk').html('<b class="c-red">[이름은 필수정보!]</b>');
+                    checkArr[3] = false;
+                }
+                //이름값 유효성검사
+                else if (!getName.test($("#user_name").val())) {
+                    $('#user_name').css('border-color', 'red');
+                    $('#nameChk').html('<b class="c-red">[이름은 한글로 ~]</b>');
+                    checkArr[3] = false;
+                } else {
+                    $('#user_name').css('border-color', 'skyblue');
+                    $('#nameChk').html('<b class="c-blue">[참 잘했어요]</b>');
+                    checkArr[3] = true;
+                }
+
+            });
+
+            //이메일 입력값 검증.
+            const $emailInput = $('#user_email');
+            $emailInput.on('keyup', function () {
+                //이메일값 공백 확인
+                if ($emailInput.val() == "") {
+                    $emailInput.css('border-color', 'red');
+                    $('#emailChk').html('<b class="c-red">[이메일은 필수정보에요!]</b>');
+                    checkArr[4] = false;
+                }
+                //이메일값 유효성검사
+                else if (!getMail.test($emailInput.val())) {
+                    $emailInput.css('border-color', 'red');
+                    $('#emailChk').html('<b class="c-red">[이메일 형식 몰라?]</b>');
+                    checkArr[4] = false;
+                } else {
+
+                    //이메일 중복확인 비동기 통신
+                    fetch('/member/check?type=email&value=' + $emailInput.val())
+                        .then(res => res.text())
+                        .then(flag => {
+                            //console.log(flag);
+                            if (flag === 'true') {
+                                $emailInput.css('border-color', 'red');
+                                $('#emailChk').html(
+                                    '<b class="c-red">[이메일이 중복되었습니다!]</b>');
+                                checkArr[4] = false;
+                            } else {
+                                $emailInput.css('border-color', 'skyblue');
+                                $('#emailChk').html(
+                                    '<b class="c-blue">[사용가능한 이메일입니다.]</b>'
+                                );
+                                checkArr[4] = true;
+                            }
+                        });
+                }
+
+            });
+
+
+            // 회원가입 양식 서버로 전송하는 클릭 이벤트
+            const $regForm = $('#signUpForm');
+
+            $('#signup-btn').on('click', e => {
+
+                if (!checkArr.includes(false)) {
+                    $regForm.submit();
+                } else {
+                    alert('입력란을 다시 확인하세요!');
+                }
+            });
+
+
+
+        }); // end jQuery
     </script>
 
 

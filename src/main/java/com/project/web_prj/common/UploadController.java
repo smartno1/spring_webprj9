@@ -15,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +23,7 @@ import java.util.List;
 public class UploadController {
 
     // 업로드 파일 저장 경로
-    private static final String UPLOAD_PATH = "D:\\web_lks\\upload";
+    private static final String UPLOAD_PATH = "C:\\sl_dev\\upload";
 
     // upload-form.jsp로 포워딩하는 요청
     @GetMapping("/upload-form")
@@ -48,18 +47,18 @@ public class UploadController {
 
 
             // 서버에 업로드파일 저장
-            // 업로드파일 용량제한은 resource/application.properties 에서 지정.
+
 
 
             // 1. 세이브파일 객체 생성
             //  - 첫번째 파라미터는 파일 저장경로 지정, 두번째 파일명지정
-//            File f = new File(UPLOAD_PATH, file.getOriginalFilename());
+        /*File f = new File(uploadPath, file.getOriginalFilename());
 
-//            try {
-//                file.transferTo(f);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
+        try {
+            file.transferTo(f);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
 
             FileUtils.uploadFile(file, UPLOAD_PATH);
         }
@@ -108,7 +107,7 @@ public class UploadController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        // 2. 해당 파일을 InputStream을 통해 불러온다. app 쪽에서는 인풋은 자기쪽으로 들어오는것, 불러오기. 아웃풋은 자기한테서 나가는 것. 저장.
+        // 2. 해당 파일을 InputStream을 통해 불러온다.
         try (FileInputStream fis = new FileInputStream(f)) {
 
             // 3. 클라이언트에게 순수 이미지를 응답해야 하므로 MIME TYPE을 응답헤더에 설정
@@ -121,7 +120,7 @@ public class UploadController {
             HttpHeaders headers = new HttpHeaders();
 
             if (mediaType != null) { // 이미지라면
-                headers.setContentType(mediaType); // 기본값이 json 이므로 바꿔줘야 한다.
+                headers.setContentType(mediaType);
             } else { // 이미지가 아니면 다운로드 가능하게 설정
                 headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
 
@@ -138,7 +137,7 @@ public class UploadController {
 
             }
 
-            // 4. 파일 순수데이터 바이트배열에 저장. 직렬화
+            // 4. 파일 순수데이터 바이트배열에 저장.
             byte[] rawData = IOUtils.toByteArray(fis);
 
             // 5. 비동기통신에서 데이터 응답할 때 ResponseEntity객체를 사용

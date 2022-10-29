@@ -26,7 +26,7 @@ public interface ReplyMapper {
     Reply findOne(Long replyNo);
 
     //댓글 목록 조회
-    List<Reply> findAll(@Param("boardNo") Long boardNo  // 두 객체에 같은 필드명이 존재 -> 충돌 -> 식별자를 부여해 해결.
+    List<Reply> findAll(@Param("boardNo") Long boardNo
             , @Param("page") Page page);
 
     // 댓글 수 조회

@@ -12,75 +12,40 @@
     </resultMap>
 
     <insert id="save">
-<!--        oracle DB -->
-<!--        INSERT INTO tbl_board-->
-<!--        (board_no, writer, title, content)-->
-<!--        VALUES (seq_tbl_board.nextval, #{writer}, #{title}, #{content})-->
-
-<!--        mariadb -->
         INSERT INTO tbl_board
-        (writer, title, content)
-        VALUES (#{writer}, #{title}, #{content})
+        (board_no, writer, title, content, account)
+        VALUES (seq_tbl_board.nextval, #{writer}, #{title}, #{content}, #{account})
     </insert>
 
     <select id="findAll" resultMap="boardMap">
-<!--        oracle db-->
-<!--        SELECT  *-->
-<!--        FROM (SELECT ROWNUM rn, v_board.*-->
-<!--              FROM (-->
-<!--                        SELECT *-->
-<!--                        FROM tbl_board-->
-<!--                        ORDER BY board_no DESC-->
-<!--                        ) v_board)-->
-<!--        WHERE rn BETWEEN (#{pageNum} - 1) * #{amount} + 1 AND (#{pageNum} * #{amount})-->
-
-<!--        mariadb -->
         SELECT  *
-        FROM tbl_board
-        ORDER BY board_no DESC
-        LIMIT #{start}, #{amount}
+        FROM (SELECT ROWNUM rn, v_board.*
+              FROM (
+                        SELECT *
+                        FROM tbl_board
+                        ORDER BY board_no DESC
+                        ) v_board)
+        WHERE rn BETWEEN (#{pageNum} - 1) * #{amount} + 1 AND (#{pageNum} * #{amount})
     </select>
 
     <select id="findAll2" resultMap="boardMap">
-<!--        ORACLE DB -->
-<!--        SELECT  *-->
-<!--        FROM (-->
-<!--                SELECT ROWNUM rn, v_board.*-->
-<!--                FROM (-->
-<!--                        SELECT *-->
-<!--                        FROM tbl_board-->
-<!--                        <if test="type == 'title'">WHERE title LIKE '%' || #{keyword} || '%'</if>-->
-<!--                        <if test="type == 'writer'">WHERE writer LIKE '%' || #{keyword} || '%'</if>-->
-<!--                        <if test="type == 'content'">WHERE content LIKE '%' || #{keyword} || '%'</if>-->
-<!--                        <if test="type == 'tc'">-->
-<!--                            WHERE title LIKE '%' || #{keyword} || '%'-->
-<!--                                OR content LIKE '%' || #{keyword} || '%'-->
-<!--                        </if>-->
-<!--                        ORDER BY board_no DESC-->
-<!--                        ) v_board-->
-<!--              )-->
-<!--        WHERE rn BETWEEN (#{pageNum} - 1) * #{amount} + 1 AND (#{pageNum} * #{amount})-->
-
-<!--        MARIA DB-->
         SELECT  *
-        FROM tbl_board
-<!--         동적 sql 문 -->
-        <if test="type == 'title'">
-            WHERE title LIKE CONCAT('%', #{keyword},'%')
-        </if>
-        <if test="type == 'content'">
-            WHERE content LIKE CONCAT('%', #{keyword},'%')
-        </if>
-        <if test="type == 'writer'">
-            WHERE writer LIKE CONCAT('%', #{keyword},'%')
-        </if>
-        <if test="type == 'tc'">
-            WHERE title LIKE CONCAT('%', #{keyword},'%')
-            OR content LIKE CONCAT('%', #{keyword},'%')
-        </if>
-        ORDER BY board_no DESC
-        LIMIT #{start}, #{amount}
-
+        FROM (
+                SELECT ROWNUM rn, v_board.*
+                FROM (
+                        SELECT *
+                        FROM tbl_board
+                        <if test="type == 'title'">WHERE title LIKE '%' || #{keyword} || '%'</if>
+                        <if test="type == 'writer'">WHERE writer LIKE '%' || #{keyword} || '%'</if>
+                        <if test="type == 'content'">WHERE content LIKE '%' || #{keyword} || '%'</if>
+                        <if test="type == 'tc'">
+                            WHERE title LIKE '%' || #{keyword} || '%'
+                                OR content LIKE '%' || #{keyword} || '%'
+                        </if>
+                        ORDER BY board_no DESC
+                        ) v_board
+              )
+        WHERE rn BETWEEN (#{pageNum} - 1) * #{amount} + 1 AND (#{pageNum} * #{amount})
     </select>
 
     <select id="findOne" resultMap="boardMap">
@@ -99,26 +64,20 @@
         WHERE board_no=#{boardNo}
     </update>
 
-    <select id="getTotalCount" resultType="int"> <!-- 컬럼이 한개일경우 그값의 데이터유형으로, 행이 여러개면 이경우 인티져리스트에 닮아준다. -->
-        SELECT COUNT(*)                         <!-- 컬럼이 여러개면 Map 으로 -->
+    <select id="getTotalCount" resultType="int">
+        SELECT COUNT(*)
         FROM tbl_board
     </select>
 
     <select id="getTotalCount2" resultType="int">
         SELECT COUNT(*)
         FROM tbl_board
-        <if test="type == 'title'">
-            WHERE title LIKE CONCAT('%', #{keyword},'%')
-        </if>
-        <if test="type == 'content'">
-            WHERE content LIKE CONCAT('%', #{keyword},'%')
-        </if>
-        <if test="type == 'writer'">
-            WHERE writer LIKE CONCAT('%', #{keyword},'%')
-        </if>
+        <if test="type == 'title'">WHERE title LIKE '%' || #{keyword} || '%'</if>
+        <if test="type == 'writer'">WHERE writer LIKE '%' || #{keyword} || '%'</if>
+        <if test="type == 'content'">WHERE content LIKE '%' || #{keyword} || '%'</if>
         <if test="type == 'tc'">
-            WHERE title LIKE CONCAT('%', #{keyword},'%')
-            OR content LIKE CONCAT('%', #{keyword},'%')
+            WHERE title LIKE '%' || #{keyword} || '%'
+            OR content LIKE '%' || #{keyword} || '%'
         </if>
     </select>
 
@@ -134,7 +93,7 @@
         INSERT INTO file_upload
             (file_name, bno)
         VALUES
-            (#{fileName}, LAST_INSERT_ID()) <!-- LAST_INSERT_ID() = orecle : seq_tbl_board.currval  => 만들어진 것을 커밋되기전에도 가져옴.-->
+            (#{fileName}, seq_tbl_board.currval)
 
     </insert>
 
@@ -142,6 +101,18 @@
         SELECT file_name
         FROM file_upload
         WHERE bno = #{bno}
+    </select>
+
+    <select id="findMemberByBoardNo" resultType="com.project.web_prj.board.dto.ValidateMemberDTO">
+
+        SELECT account, auth
+        FROM tbl_member
+        WHERE account = (
+                            SELECT account
+                            FROM tbl_board
+                            WHERE board_no = #{boardNo}
+                        )
+
     </select>
 
 </mapper>

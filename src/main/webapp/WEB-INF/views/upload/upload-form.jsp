@@ -39,7 +39,7 @@
 <body>
 
     <!-- 파일 업로드를 위한 form - 동기 처리 -->
-    <form action="/upload" method="post" enctype="multipart/form-data"> <!-- enctype="multipart/form-data" : 파일업로드시 꼭 넣어야함. -->
+    <form action="/upload" method="post" enctype="multipart/form-data">
         <input type="file" name="file" multiple>
         <button type="submit">업로드</button>
     </form>
@@ -65,7 +65,7 @@
 
 
     <script>
-        // start JQuery
+        // start JQuery 
         $(document).ready(function () {
 
             function isImageFile(originFileName) {
@@ -125,8 +125,7 @@
 
 
             // drag & drop 이벤트
-
-            const $dropBox = $('.fileDrop');    // = const $dropBox = document.querySelector(".fileDrop");
+            const $dropBox = $('.fileDrop');
 
             // drag 진입 이벤트
             $dropBox.on('dragover dragenter', e => {

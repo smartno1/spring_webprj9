@@ -17,11 +17,6 @@ public class Page {
         this.amount = 10;
     }
 
-    // start 값 계산 함수
-    public int getStart(){
-        return (pageNum - 1) * amount;
-    }
-
     public void setPageNum(int pageNum) {
         if (pageNum <= 0 || pageNum > Integer.MAX_VALUE) {
             this.pageNum = 1;

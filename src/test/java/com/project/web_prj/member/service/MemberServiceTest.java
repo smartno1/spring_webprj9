@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -13,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class MemberServiceTest {
 
     @Autowired MemberService service;
+
 
     @Test
     @DisplayName("평문 비밀번호로 회원가입하면 암호화되어 저장된다.")
@@ -43,4 +45,7 @@ class MemberServiceTest {
         assertTrue(flag);
 
     }
+
+
+
 }

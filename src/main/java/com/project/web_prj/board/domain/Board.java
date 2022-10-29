@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 
-@Getter @Setter @ToString @EqualsAndHashCode
+@Setter @Getter @ToString @EqualsAndHashCode
 @NoArgsConstructor @AllArgsConstructor
 public class Board {
 
@@ -18,6 +18,7 @@ public class Board {
     private String content;
     private Long viewCnt;
     private Date regDate;
+    private String account;
 
 
     // 커스텀 데이터 필드

@@ -21,7 +21,7 @@ class BoardRepositoryImplTest {
 
     @Autowired
 //    @Qualifier("bri")
-    BoardMapper repository;
+    BoardRepository repository;
 
     @Test
     @DisplayName("300개의 게시물을 삽입해야 한다.")
@@ -41,7 +41,7 @@ class BoardRepositoryImplTest {
     @DisplayName("전체 게시물을 조회하고 반환된 리스트의 사이즈는 300이어야 한다.")
     void findAllTest() {
 
-        List<Board> boardList = repository.findAll(null);
+        List<Board> boardList = repository.findAll();
         boardList.forEach(b -> System.out.println(b));
 
         assertEquals(300, boardList.size());

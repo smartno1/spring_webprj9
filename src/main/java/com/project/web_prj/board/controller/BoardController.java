@@ -5,6 +5,7 @@ import com.project.web_prj.board.service.BoardService;
 import com.project.web_prj.common.paging.Page;
 import com.project.web_prj.common.paging.PageMaker;
 import com.project.web_prj.common.search.Search;
+import com.project.web_prj.util.LoginUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -13,10 +14,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +77,13 @@ public class BoardController {
 
     // 게시물 쓰기 화면 요청
     @GetMapping("/write")
-    public String write() {
+    public String write(HttpSession session, RedirectAttributes ra) {
+
+//        if (session.getAttribute("loginUser") == null) {
+//            ra.addFlashAttribute("warningMsg", "forbidden");
+//            return "redirect:/member/sign-in";
+//        }
+
         log.info("controller request /board/write GET!");
         return "board/board-write";
     }
@@ -83,7 +92,9 @@ public class BoardController {
     @PostMapping("/write")
     public String write(Board board,
                         @RequestParam("files") List<MultipartFile> fileList,
-                        RedirectAttributes ra) {
+                        RedirectAttributes ra,
+                        HttpSession session
+    ) {
 
         log.info("controller request /board/write POST! - {}", board);
 
@@ -97,6 +108,9 @@ public class BoardController {
             board.setFileNames(fileNames);
         }*/
 
+        // 현재 로그인 사용자 계정명 추가
+        board.setAccount(LoginUtils.getCurrentMemberAccount(session));
+
         boolean flag = boardService.saveService(board);
         // 게시물 등록에 성공하면 클라이언트에 성공메시지 전송
         if (flag) ra.addFlashAttribute("msg", "reg-success");
@@ -104,12 +118,23 @@ public class BoardController {
         return flag ? "redirect:/board/list" : "redirect:/";
     }
 
-    // 게시물 삭제 요청
+    // 게시물 삭제 확인 요청
     @GetMapping("/delete")
-    public String delete(Long boardNo) {
+    public String delete(@ModelAttribute("boardNo") Long boardNo, Model model) {
+
         log.info("controller request /board/delete GET! - bno: {}", boardNo);
-        return boardService.removeService(boardNo)
-                ? "redirect:/board/list" : "redirect:/";
+
+        model.addAttribute("validate", boardService.getMember(boardNo));
+
+        return "board/process-delete";
+    }
+
+    // 게시물 삭제 확정 요청
+    @PostMapping("/delete")
+    public String delete(Long boardNo) {
+        log.info("controller request /board/delete POST! - bno: {}", boardNo);
+
+        return boardService.removeService(boardNo) ? "redirect:/board/list" : "redirect:/";
     }
 
     // 수정 화면 요청
@@ -120,6 +145,8 @@ public class BoardController {
         log.info("find article: {}", board);
 
         model.addAttribute("board", board);
+        model.addAttribute("validate", boardService.getMember(boardNo));
+
         return "board/board-modify";
     }
 

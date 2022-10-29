@@ -71,9 +71,9 @@ public class FileUtils {
         // full-path => E:/sl_dev/upload/2022/08/01/dfsdjfksfdkjs_상어.jpg
         // res-path =>  /2022/08/01/dfsdjfksfdkjs_상어.jpg
         // uploadPath => E:/sl_dev/upload
-        String responseFilePath = fileFullPath.substring(uploadPath.length()); // res-path 추출.
+        String responseFilePath = fileFullPath.substring(uploadPath.length());
 
-        return responseFilePath.replace("\\", "/");     // 윈도우에서 코딩시 \\로 되있기때문에 브라우저로 갈때는 / 로 바꿔야한다.
+        return responseFilePath.replace("\\", "/");
     }
 
     /**
@@ -84,14 +84,14 @@ public class FileUtils {
     private static String getNewUploadPath(String uploadPath) {
 
         // 오늘 년,월,일 정보 가져오기
-        LocalDateTime now = LocalDateTime.now();    // Date, Calender 은 사용금지 권고.
+        LocalDateTime now = LocalDateTime.now();
         int y = now.getYear();
         int m = now.getMonthValue();
         int d = now.getDayOfMonth();
 
         // 폴더 생성
         String[] dateInfo = {
-                String.valueOf(y)   // == "" + y
+                String.valueOf(y)
                 , len2(m)
                 , len2(d)
         };
@@ -101,7 +101,7 @@ public class FileUtils {
         // File.separator : 운영체제에 맞는 디렉토리 경로구분문자를 생성
         // 리눅스 : / ,  윈도우 : \
         for (String date : dateInfo) {
-            newUploadPath += File.separator + date; // File.separator : 운영체제에 맞게 \(윈도우) 나 /(리눅스) 를 넣어줌.
+            newUploadPath += File.separator + date;
 
             // 해당 경로대로 폴더를 생성
             File dirName = new File(newUploadPath);
