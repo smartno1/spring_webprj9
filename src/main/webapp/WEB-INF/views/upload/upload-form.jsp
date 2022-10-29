@@ -1,21 +1,21 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <!DOCTYPE html>
 <html lang="ko">
 
 <head>
-    <%@ include file="../include/static-head.jsp" %>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+
+    <!-- jquery -->
+    <script src="/js/jquery-3.3.1.min.js"></script>
 
     <style>
-        .write-container {
-            width: 50%;
-            margin: 200px auto 150px;
-            font-size: 1.2em;
-        }
-
         .fileDrop {
-            width: 600px;
-            height: 200px;
+            width: 800px;
+            height: 400px;
             border: 1px dashed gray;
             display: flex;
             justify-content: center;
@@ -33,111 +33,39 @@
             height: 100px;
         }
     </style>
+
 </head>
 
 <body>
-    <div class="wrap">
-        <%@ include file="../include/header.jsp" %>
 
-        <div class="write-container">
+    <!-- 파일 업로드를 위한 form - 동기 처리 -->
+    <form action="/upload" method="post" enctype="multipart/form-data"> <!-- enctype="multipart/form-data" : 파일업로드시 꼭 넣어야함. -->
+        <input type="file" name="file" multiple>
+        <button type="submit">업로드</button>
+    </form>
 
-            <form id="write-form" action="/board/write" method="post" autocomplete="off" enctype="multipart/form-data">
+    <!-- 비동기 통신을 통한 실시간 파일 업로드 처리 -->
+    <div class="fileDrop">
+        <span>DROP HERE!!</span>
+    </div>
 
-                
+    <!-- 
+        - 파일 정보를 서버로 보내기 위해서는 <input type="file"> 이 필요
+        - 해당 input태그는 사용자에게 보여주어 파일을 직접 선택하게 할 것이냐
+          혹은 드래그앤 드롭으로만 처리를 할 것이냐에 따라 display를 상태를 결정
+     -->
+    <div class="uploadDiv">
+        <input type="file" name="files" id="ajax-file" style="display:none;">
+    </div>
 
-                <div class="mb-3">
-                    <label for="writer-input" class="form-label">작성자</label>
-                    <input type="text" class="form-control" id="writer-input" placeholder="이름" name="writer"
-                        maxlength="20">
-                </div>
-                <div class="mb-3">
-                    <label for="title-input" class="form-label">글제목</label>
-                    <input type="text" class="form-control" id="title-input" placeholder="제목" name="title">
-                </div>
-                <div class="mb-3">
-                    <label for="exampleFormControlTextarea1" class="form-label">내용</label>
-                    <textarea name="content" class="form-control" id="exampleFormControlTextarea1" rows="10"></textarea>
-                </div>
-
-                <!-- 첨부파일 드래그 앤 드롭 영역 -->
-                <div class="form-group">
-                    <div class="fileDrop">
-                        <span>Drop Here!!</span>
-                    </div>
-                    <div class="uploadDiv">
-                        <input type="file" name="files" id="ajax-file" style="display:none;">
-                    </div>
-                    <!-- 업로드된 파일의 썸네일을 보여줄 영역 -->
-                    <div class="uploaded-list">
-
-                    </div>
-                </div>
-
-
-                <div class="d-grid gap-2">
-                    <button id="reg-btn" class="btn btn-dark" type="button">글 작성하기</button>
-                    <button id="to-list" class="btn btn-warning" type="button">목록으로</button>
-                </div>
-
-            </form>
-
-        </div>
-
-        <%@ include file="../include/footer.jsp" %>
-
-
+    <!-- 업로드된 이미지의 썸네일을 보여주는 영역 -->
+    <div class="uploaded-list">
 
     </div>
 
 
     <script>
-        // 게시물 등록 입력값 검증 함수
-        function validateFormValue() {
-            // 이름입력태그, 제목 입력태그
-            const $writerInput = document.getElementById('writer-input');
-            const $titleInput = document.getElementById('title-input');
-            let flag = false; // 입력 제대로하면 true로 변경
-
-            console.log('w: ', $writerInput.value);
-            console.log('t: ', $titleInput.value);
-
-            if ($writerInput.value.trim() === '') {
-                alert('작성자는 필수값입니다~');
-            } else if ($titleInput.value.trim() === '') {
-                alert('제목은 필수값입니다~');
-            } else {
-                flag = true;
-            }
-
-            console.log('flag:', flag);
-
-            return flag;
-        }
-
-        // 게시물 입력값 검증
-        const $regBtn = document.getElementById('reg-btn');
-
-        $regBtn.onclick = e => {
-            // 입력값을 제대로 채우지 않았는지 확인
-            if (!validateFormValue()) {
-                return;
-            }
-
-            // 필수 입력값을 잘 채웠으면 폼을 서브밋한다.
-            const $form = document.getElementById('write-form');
-            $form.submit();
-        };
-
-
-        //목록버튼 이벤트
-        const $toList = document.getElementById('to-list');
-        $toList.onclick = e => {
-            location.href = '/board/list';
-        };
-    </script>
-
-    <script>
-        // start JQuery 
+        // start JQuery
         $(document).ready(function () {
 
             function isImageFile(originFileName) {
@@ -151,15 +79,6 @@
 
                 //원본 파일 명 추출
                 let originFileName = fileName.substring(fileName.indexOf("_") + 1);
-
-
-                // hidden input을 만들어서 변환파일명을 서버로 넘김
-                const $hiddenInput = document.createElement('input');
-                $hiddenInput.setAttribute('type', 'hidden');
-                $hiddenInput.setAttribute('name', 'fileNames');
-                $hiddenInput.setAttribute('value', fileName);
-
-                $('#write-form').append($hiddenInput);
 
                 //확장자 추출후 이미지인지까지 확인
                 if (isImageFile(originFileName)) { // 파일이 이미지라면
@@ -206,7 +125,8 @@
 
 
             // drag & drop 이벤트
-            const $dropBox = $('.fileDrop');
+
+            const $dropBox = $('.fileDrop');    // = const $dropBox = document.querySelector(".fileDrop");
 
             // drag 진입 이벤트
             $dropBox.on('dragover dragenter', e => {

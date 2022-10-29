@@ -14,7 +14,7 @@ public class PageMaker {
     private static final int PAGE_COUNT = 10;
 
     // 렌더링시 페이지 시작값, 페이지 끝값
-    private int beginPage, endPage;
+    private int beginPage, endPage, finalPage;
 
     // 이전, 다음 버튼 활성화 여부
     private boolean prev, next;
@@ -54,6 +54,8 @@ public class PageMaker {
 
          */
         int realEnd = (int)Math.ceil((double) totalCount / page.getAmount());
+
+        this.finalPage = realEnd;
 
         // 그러면 끝 페이지보정은 언제 일어나야 하는가
         // 마지막 페이지 구간에서 일어날수도 있고 아닐수도 있다
